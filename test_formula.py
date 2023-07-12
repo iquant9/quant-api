@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 import os, sys
 import copy
-import talib
+
 import math
 import warnings
 
