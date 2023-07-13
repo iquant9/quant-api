@@ -42,3 +42,15 @@ jobs:
           docker build . --tag ghcr.io/${{github.actor}}/quant-api:${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
           docker push ghcr.io/${{github.actor}}/quant-api:${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
 
+      - name: Trigger CI
+        uses: InformaticsMatters/trigger-ci-action@1.0.1
+        with:
+          ci-owner: iquant9
+          ci-repository: deploy
+          ci-ref: refs/heads/master
+          ci-user: iquant9
+          ci-user-token: ${{ secrets.CI_TOKEN }}
+          ci-name: CI
+          ci-inputs: >-
+            image=${{ secrets.USERNAME }}/quant-api
+            sha-tag=${{ github.sha }}
