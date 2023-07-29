@@ -45,7 +45,7 @@ jobs:
       - name: Invoke workflow in another repo with inputs
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: trigger-set-image
+          workflow: trigger-set-image.yml
           repo: iquant9/deploy
           inputs: '{ "image": "${{ secrets.USERNAME }}/quant-api", "sha-tag": "${{ github.sha }}" }'
           token: ${{secrets.GITHUB_TOKEN}}
