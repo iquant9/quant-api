@@ -51,5 +51,5 @@ jobs:
         with:
           workflow: trigger-set-image.yml
           repo: iquant9/deploy
-          inputs: '{ "image": "${{ secrets.USERNAME }}/quant-api", "sha-tag": "${{ steps.vars.outputs.sha_short }}" }'
+          inputs: '{ "image": "${{ secrets.USERNAME }}/quant-api", "sha-tag": "${{ steps.image_tag.outputs.new_image_tag }}" }'
           token: ${{ secrets.WORKFLOW_ACCESS_ALL_MY_REPO }}
