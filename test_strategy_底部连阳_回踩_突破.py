@@ -63,6 +63,7 @@ class TestStrategy(TestCase):
         self.assertEqual(len(dates), 1)
 
     def test_kline_em_index_减速器_1d(self):
+        # hit 2023-06-12
         data = MySQLData(
             "kline_em",
             symbol="减速器",
@@ -76,9 +77,10 @@ class TestStrategy(TestCase):
         self.assertGreater(len(hit_list), 0)
         dates = result[0].orders.hit_dt.dt.strftime('%Y-%m-%d')
         # 对series去重
-        dates=dates.drop_duplicates()
+        dates = dates.drop_duplicates()
         self.assertIn("2023-06-12", list(dates), "hit")
         self.assertEqual(len(dates), 2)
+
     def test_kline_em_index_CPO概念_1d(self):
         data = MySQLData(
             "kline_em",
@@ -93,6 +95,24 @@ class TestStrategy(TestCase):
         self.assertGreater(len(hit_list), 0)
         dates = result[0].orders.hit_dt.dt.strftime('%Y-%m-%d')
         # 对series去重
-        dates=dates.drop_duplicates()
+        dates = dates.drop_duplicates()
+        self.assertIn("2023-06-12", list(dates), "hit")
+        self.assertEqual(len(dates), 2)
+
+    def test_kline_em_index_AIGC概念_1d(self):
+        data = MySQLData(
+            "kline_em",
+            symbol="AIGC概念",
+            contract_type="index",
+            fromdate=datetime.datetime(2022, 10, 1),
+            todate=datetime.datetime(2023, 1, 20),
+            interval="1d",
+        )
+        result = run_formula(Strategy, data)
+        hit_list = list(result[0].orders.hit_dt.astype(str).values.tolist())
+        self.assertGreater(len(hit_list), 0)
+        dates = result[0].orders.hit_dt.dt.strftime('%Y-%m-%d')
+        # 对series去重
+        dates = dates.drop_duplicates()
         self.assertIn("2023-06-12", list(dates), "hit")
         self.assertEqual(len(dates), 2)

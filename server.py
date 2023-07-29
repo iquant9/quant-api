@@ -29,7 +29,7 @@ async def handler(request):
     start = parse(d['start'])
     end = parse(d['end'])
     for section in d["symbol_group"]:
-        table, contract_type, symbol, interval = section.split(".")
+        table, contract_type, symbol, interval = section.split(":")
         data = MySQLData(
             table,
             symbol=symbol,
@@ -41,7 +41,7 @@ async def handler(request):
         try:
             result = run_formula(f, data)
         except Exception as e:
-            logger.error('run_formula error:%s', e)
+            logger.error('run_formula error:%s %s', e, d)
             continue
         if df is None:
             df = result[0].orders
@@ -66,10 +66,11 @@ def rest(request):
         raise SanicException("Something went wrong.%s" % (e), status_code=501)
     logger.info('df len is %d' % len(df))
 
-    # df = qstock.realtime_data()
-    # response = df.to_json(orient='records', force_ascii=False)
-    # 查看前几行
-    return json(df.to_dict('records'))
+    # default is a function applied to objects that aren't serializable.
+    # In this case it's str, so it just converts everything it doesn't know to strings.
+    return json(df.dropna().to_dict('records'), headers={"charset": "utf-8"},
+                default=str,
+                ensure_ascii=False)
 
     # return JsonResponse(json.loads(response), json_dumps_params={'ensure_ascii': False}, safe=False)
 

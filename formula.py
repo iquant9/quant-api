@@ -23,6 +23,8 @@ class Ind:
         self.dif = None
         self.dea = None
         self.macd = None
+        self.vol5 = None
+        self.vol10 = None
 
     def get_macd_arr(self):
         return self.macd
@@ -70,7 +72,7 @@ class Formula():
             return False, 0, 0
         # k.datetime.datetime(-start)
         # k.datetime.datetime(-end)
-        连阳 = LAST((close / REF(close, 1)) > 0.995, self.get_idx(k)-start, self.get_idx(k)-end)
+        连阳 = LAST((close / REF(close, 1)) > 0.995, self.get_idx(k) - start, self.get_idx(k) - end)
         if 连阳[-1]:
             pass
         else:
@@ -85,7 +87,12 @@ class Formula():
         return k.close.idx
 
     def get_array(self, line):
-        return np.array(line.get(0, size=line.idx + 1))
+        try:
+            # kline path
+            return np.array(line.get(0, size=line.idx + 1))
+        except:
+            # ind path
+            return np.array(line.get(0, size=line.line.idx + 1))
 
     def get_past_array(self, line):
         return np.array(line.get(ago=-1, size=line.idx))
@@ -116,22 +123,6 @@ class FormulaStrategy(bt.Strategy):
         # 指标
         self.ind = {}
         # 均线
-        for d in self.datas:
-            self.ind[d] = Ind()
-            self.ind[d].ma5 = bt.ind.SMA(d, period=5)
-            self.ind[d].ma10 = bt.ind.SMA(d, period=10)
-            self.ind[d].ma20 = bt.ind.SMA(d, period=20)
-
-            self.ind[d].macd = bt.indicators.MACD(self.data,
-                                                  period_me1=self.params.macd1,
-                                                  period_me2=self.params.macd2,
-                                                  period_signal=self.params.macdsig)
-
-            # Cross of macd.macd and macd.signal
-            self.ind[d].mcross = bt.indicators.CrossOver(self.ind[d].macd.macd, self.ind[d].macd.signal)
-
-            # self.ind[d].ma60 = bt.ind.SMA(d, period=60)
-            # self.ind[d].ma120 = bt.ind.SMA(d, period=120)
 
     def prenext(self):
 

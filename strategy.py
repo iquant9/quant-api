@@ -5,6 +5,23 @@ from formula import *
 class BaseStrategy(bt.Strategy):
     def __init__(self):
         self.orders = pd.DataFrame(columns=['hit_dt', 'executed_dt', 'ordtype', 'symbol', 'price', 'value'])
+        # 指标
+        self.ind = {}
+        # 均线
+        for d in self.datas:
+            self.ind[d] = Ind()
+            self.ind[d].ma5 = bt.ind.SMA(d, period=5)
+            self.ind[d].ma10 = bt.ind.SMA(d, period=10)
+            self.ind[d].ma20 = bt.ind.SMA(d, period=20)
+            m = bt.indicators.MACD(self.data,
+                                   period_me1=12,
+                                   period_me2=26,
+                                   period_signal=9)
+            self.ind[d].dif = m.macd
+            self.ind[d].dea = m.signal
+            self.ind[d].macd = m.macd - m.signal
+            self.ind[d].vol5 = bt.ind.SMA(d.volume, period=5)
+            self.ind[d].vol10 = bt.ind.SMA(d.volume, period=10)
 
     def log(self, txt, dt=None):
         ''' Logging function fot this strategy'''
@@ -16,13 +33,13 @@ class BaseStrategy(bt.Strategy):
             if order.executed.dt:
                 executed_dt = bt.num2date(order.executed.dt)
             else:
-                executed_dt=None
+                executed_dt = None
             hit_dt = self.data.datetime.datetime(-1)
             self.buyprice = order.executed.price
             self.buycomm = order.executed.comm
             symbol = self.getdatanames()[0]
             self.orders.loc[len(self.orders)] = [hit_dt, executed_dt, order.ordtype, symbol, order.executed.price,
-                                   order.executed.value]  # adding a row
+                                                 order.executed.value]  # adding a row
 
         if order.status in [order.Submitted, order.Accepted]:
             # Buy/Sell order submitted/accepted to/by broker - Nothing to do

@@ -47,7 +47,7 @@ jobs:
         with:
           ci-owner: iquant9
           ci-repository: deploy
-          ci-ref: refs/heads/master
+          ci-ref: refs/heads/main
           ci-user: iquant9
           ci-user-token: ${{ secrets.CI_TOKEN }}
           ci-name: CI

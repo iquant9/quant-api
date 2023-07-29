@@ -18,21 +18,6 @@ class Strategy(BaseStrategy):
         self.position_dict = {}
         # 当前有交易的股票
         self.stock_dict = {}
-        # 指标
-        self.ind = {}
-        # 均线
-        for d in self.datas:
-            self.ind[d] = Ind()
-            self.ind[d].ma5 = bt.ind.SMA(d, period=5)
-            self.ind[d].ma10 = bt.ind.SMA(d, period=10)
-            self.ind[d].ma20 = bt.ind.SMA(d, period=20)
-            m = bt.indicators.MACD(self.data,
-                                   period_me1=12,
-                                   period_me2=26,
-                                   period_signal=9)
-            self.ind[d].dif = m.macd
-            self.ind[d].dea = m.signal
-            self.ind[d].macd = m.macd - m.signal
 
     def next(self):
         current_date = self.datas[0].datetime.datetime(0)
@@ -51,9 +36,18 @@ class Strategy(BaseStrategy):
             return
         if end <= 3:
             return
+        if ind.vol5:
+            vol5_arr = self.formula.get_array(ind.vol5)
+            if (vol5_arr < REF(vol5_arr, 1))[-1]:
+                return False
+        vol_arr = self.formula.get_array(self.data.volume)
+        # 【筛选】上涨期间应该是放量的，随后的回调应该是缩量的，成交量至少缩1/2
+        上涨期间max_vol = HHV(REF(vol_arr, end), start - end)[-1]
+        if not COUNT(vol_arr < (上涨期间max_vol / 2), end)[-1]:
+            return False
         # 陷阱1：回踩太多，比如dif已经到水下，说明股价已经失控，形态已经失效
-        dif和macd在水下 = BARSLAST((self.formula.get_array(ind.dif) < 0) &(self.formula.get_array(ind.macd)<0))
-        if dif和macd在水下[-1]<end:
+        dif和macd在水下 = BARSLAST((self.formula.get_array(ind.dif) < 0) & (self.formula.get_array(ind.macd) < 0))
+        if dif和macd在水下[-1] < end:
             return False
         # 临界条件
         close_arr = self.formula.get_array(self.data.close)
@@ -61,7 +55,10 @@ class Strategy(BaseStrategy):
         ma10_arr = self.formula.get_array(self.ind[self.data].ma10.line)
 
         high1 = HHVBARS(close_arr, start)
+        # 如果今天不是最高价，要求上穿ma5和ma10
         if high1[-1] != 0:
+            if k.volume < ind.vol5:
+                return False
             if CROSS(close_arr, ma5_arr)[-1] and CROSS(close_arr, ma10_arr)[-1]:
                 self.order = self.buy(data=self.data)
                 return True
@@ -69,4 +66,5 @@ class Strategy(BaseStrategy):
         # 只在第一次新高产生买点，避免连续的新高连续命中
         if REF(high1, 1)[-1] < 2:
             return False
+
         self.order = self.buy(data=self.data)
