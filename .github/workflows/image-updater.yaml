@@ -47,7 +47,7 @@ jobs:
         with:
           workflow: trigger-set-image
           repo: iquant9/deploy
-          inputs: '{ "image": "${{ secrets.USERNAME }}/quant-api", "sha-tag": ${{ github.sha }} }'
+          inputs: '{ "image": "${{ secrets.USERNAME }}/quant-api", "sha-tag": "${{ github.sha }}" }'
       - name: Trigger CI
         uses: InformaticsMatters/trigger-ci-action@1.0.1
         with:
