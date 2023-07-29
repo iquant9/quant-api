@@ -50,7 +50,7 @@ jobs:
           ci-ref: refs/heads/main
           ci-user: iquant9
           ci-user-token: ${{ secrets.CI_TOKEN }}
-          ci-name: CI
+          ci-name: trigger-set-image
           ci-inputs: >-
             image=${{ secrets.USERNAME }}/quant-api
             sha-tag=${{ github.sha }}
