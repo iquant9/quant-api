@@ -27,6 +27,9 @@ jobs:
         shell: bash
         run: echo "branch=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_OUTPUT
         id: branch
+      - name: Set image tag
+        id: image_tag
+        run: echo "new_image_tag=${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}" >>$GITHUB_OUTPUT
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -40,8 +43,8 @@ jobs:
       - name: Build quant-api and push
         run: |
           echo ${{secrets.GITHUB_TOKEN}}
-          docker build . --tag ghcr.io/${{github.actor}}/quant-api:${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
-          docker push ghcr.io/${{github.actor}}/quant-api:${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
+          docker build . --tag ghcr.io/${{github.actor}}/quant-api:${{ steps.image_tag.outputs.new_image_tag }}
+          docker push ghcr.io/${{github.actor}}/quant-api:${{ steps.image_tag.outputs.new_image_tag }}
 
       - name: Invoke workflow in another repo with inputs
         uses: benc-uk/workflow-dispatch@v1
