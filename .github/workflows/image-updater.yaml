@@ -48,17 +48,5 @@ jobs:
         with:
           workflow: trigger-set-image.yml
           repo: iquant9/deploy
-          inputs: '{ "image": "${{ secrets.USERNAME }}/quant-api", "sha-tag": "${{ github.sha }}" }'
-          token: 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
-      - name: Trigger CI
-        uses: InformaticsMatters/trigger-ci-action@1.0.1
-        with:
-          ci-owner: iquant9
-          ci-repository: deploy
-          ci-ref: refs/heads/main
-          ci-user: iquant9
-          ci-user-token: ${{ secrets.GITHUB_TOKEN }}
-          ci-name: trigger-set-image
-          ci-inputs: >-
-            image=${{ secrets.USERNAME }}/quant-api
-            sha-tag=${{ github.sha }}
+          inputs: '{ "image": "${{ secrets.USERNAME }}/quant-api", "sha-tag": "${{ steps.vars.outputs.sha_short }}" }'
+          token: ${{ secrets.WORKFLOW_ACCESS_ALL_MY_REPO }}
