@@ -39,6 +39,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build quant-api and push
         run: |
+          echo ${{secrets.GITHUB_TOKEN}}
           docker build . --tag ghcr.io/${{github.actor}}/quant-api:${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
           docker push ghcr.io/${{github.actor}}/quant-api:${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}
 
