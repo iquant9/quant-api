@@ -6,6 +6,19 @@ from backtrader.feed import DataBase
 from backtrader import date2num
 
 
+def new_data(section, start, end):
+    table, contract_type, symbol, interval = section.split(":")
+    data = MySQLData(
+        table,
+        symbol=symbol,
+        contract_type=contract_type,
+        fromdate=start,
+        todate=end,
+        interval=interval,
+    )
+    return data
+
+
 class MySQLData(DataBase):
     params = (
         ('fromdate', datetime.min),
@@ -22,7 +35,7 @@ class MySQLData(DataBase):
         "change_pct"
     )
 
-    def load_data_from_db(self, symbol, contract_type,interval, start_time, end_time):
+    def load_data_from_db(self, symbol, contract_type, interval, start_time, end_time):
         """
         从MySQL加载指定数据
         Args:
@@ -46,7 +59,7 @@ class MySQLData(DataBase):
         sql = cur.execute(
             f"SELECT * FROM {self.table} WHERE vol>0 and timestamp_in_micro >= %s"
             "and timestamp_in_micro < %s and symbol = %s and contract_type = %s and `interval` = %s order by timestamp_in_micro asc",
-            (start_time.timestamp()*1e6, end_time.timestamp()*1e6, symbol,contract_type, interval,)
+            (start_time.timestamp() * 1e6, end_time.timestamp() * 1e6, symbol, contract_type, interval,)
         )
         data = cur.fetchall()
         db.close()
@@ -58,7 +71,7 @@ class MySQLData(DataBase):
 
     def start(self):
         self.result = self.load_data_from_db(
-            self.p.symbol, self.p.contract_type,self.p.interval, self.p.fromdate, self.p.todate
+            self.p.symbol, self.p.contract_type, self.p.interval, self.p.fromdate, self.p.todate
         )
 
     def _load(self):
@@ -66,7 +79,7 @@ class MySQLData(DataBase):
             one_row = next(self.result)
         except StopIteration:
             return False
-        dt=datetime.fromtimestamp(one_row[3]/1e6)
+        dt = datetime.fromtimestamp(one_row[3] / 1e6)
         self.lines.datetime[0] = date2num(dt)
         self.lines.open[0] = float(one_row[6])
         self.lines.close[0] = float(one_row[7])
@@ -74,6 +87,6 @@ class MySQLData(DataBase):
         self.lines.low[0] = float(one_row[8])
         self.lines.volume[0] = float(one_row[10])
         self.lines.turnover[0] = float(one_row[11])
-        self.lines.change_pct[0] = self.lines.close[0]/self.lines.close[-1]-1
+        self.lines.change_pct[0] = self.lines.close[0] / self.lines.close[-1] - 1
 
         return True

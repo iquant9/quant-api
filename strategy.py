@@ -75,9 +75,18 @@ class BaseStrategy(bt.Strategy):
 
 def run_formula(strategy, data):
     cerebro = bt.Cerebro()
+    tf = bt.TimeFrame.Minutes
 
     # 添加数据到cerebro
-    cerebro.adddata(data, name=data.p.symbol + '.' + data.p.contract_type)
+    if isinstance(data, list):
+        if data[0].p.interval.endswith('d') or data[0].p.interval.endswith('w'):
+            tf = bt.TimeFrame.Days
+        for d in data:
+            cerebro.adddata(d, name=d.p.symbol + ':' + d.p.contract_type)
+    else:
+        cerebro.adddata(data, name=data.p.symbol + ':' + data.p.contract_type)
+        if data.p.interval.endswith('d') or data.p.interval.endswith('w'):
+            tf = bt.TimeFrame.Days
 
     # 添加手续费，按照万分之二收取
     cerebro.broker.setcommission(commission=0.0002, stocklike=True)
@@ -85,9 +94,7 @@ def run_formula(strategy, data):
     cerebro.broker.setcash(1_0000_0000)
     # 添加策略
     cerebro.addstrategy(strategy)
-    tf = bt.TimeFrame.Minutes
-    if data.p.interval.endswith('d') or data.p.interval.endswith('w'):
-        tf = bt.TimeFrame.Days
+
     cerebro.addanalyzer(bt.analyzers.PyFolio, timeframe=tf, compression=None)
     # 运行回测
     backtest_result = cerebro.run()
