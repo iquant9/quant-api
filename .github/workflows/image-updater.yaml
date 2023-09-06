@@ -30,7 +30,7 @@ jobs:
       - name: Set image tag
         id: image_tag
         run: echo "new_image_tag=${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}" >>$GITHUB_OUTPUT
-      - uses: iquant9/build-push-image@v1
+      - uses: iquant9/deploy/.github/workflows/build-image.yml
         with:
           registry_username: ${{github.actor}}
           registry_password: ${{secrets.GITHUB_TOKEN}}
