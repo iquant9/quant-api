@@ -30,13 +30,15 @@ jobs:
       - name: Set image tag
         id: image_tag
         run: echo "new_image_tag=${{ steps.branch.outputs.branch }}-${{ steps.vars.outputs.sha_short }}" >>$GITHUB_OUTPUT
-      - id: foo
+      - id: build-push-image
         uses: iquant9/deploy-action@main
         with:
           registry_username: ${{github.actor}}
           registry_password: ${{secrets.GITHUB_TOKEN}}
           tag: ghcr.io/${{github.actor}}/quant-api:${{ steps.image_tag.outputs.new_image_tag }}
           dockerfile: ./Dockerfile
+      - run: echo new image is ${{ steps.build-push-image.outputs.new-image }}
+        shell: bash
       - name: Invoke workflow in another repo with inputs
         uses: benc-uk/workflow-dispatch@v1
         with:
