@@ -39,7 +39,12 @@ class Strategy(BaseStrategy):
                 # base创新低，但是指数没有跌，也不要
                 if data.close.get(0) > data.close.get(-1):
                     continue
-                ind_tmp=self.ind[self.data]
-                if ind_tmp.dif> 0:
+                b_close_arr = self.formula.get_array(data.close)
+                # a创新低，b创新低
+                b_min_closes = LLVBARS(b_close_arr, 30)
+                if not b_min_closes[-1] > 0:
+                    continue
+                ind_tmp = self.ind[self.data]
+                if ind_tmp.dif > 0:
                     self.order = self.buy(data=data)
         return
