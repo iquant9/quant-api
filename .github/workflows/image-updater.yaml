@@ -34,7 +34,7 @@ jobs:
           registry_username: ${{github.actor}}
           registry_password: ${{secrets.GITHUB_TOKEN}}
           tag: ghcr.io/${{github.repository}}:${{ steps.image_tag.outputs.new_image_tag }}
-          dockerfile: ./Dockerfile
+          file: ./Dockerfile
       - run: echo new image is ${{ steps.build-push-image.outputs.new-image }}
         shell: bash
       - name: Invoke workflow in another repo with inputs
