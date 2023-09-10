@@ -11,7 +11,7 @@ strategyMap = {
     "底部连阳_回踩_突破": strategy_底部连阳_回踩_突破.Strategy,
 }
 
-app = Sanic(name='your_application_name')
+app = Sanic(name='quant-api')
 
 date_format = '%Y-%m-%d %H:%M:%S'
 
