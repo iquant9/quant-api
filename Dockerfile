@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.11
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -26,7 +26,7 @@ RUN pip install -r requirements.txt
 
 # copy the content of the local src directory to the working directory
 COPY . .
-COPY ./lib/libmini_racer.dylib /usr/local/lib/python3*/lib/python/site-packages/py_mini_racer
+COPY ./lib/libmini_racer.dylib /usr/local/lib/python3.11/lib/python/site-packages/py_mini_racer
 # EXPOSE 指令是声明容器运行时提供服务的端口
 # 这只是一个声明，在容器运行时并不会因为这个声明应用就会开启这个端口的服务。
 # 作用1.帮助镜像使用者理解这个镜像服务的守护端口，以方便配置映射；
