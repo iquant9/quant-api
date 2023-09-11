@@ -23,7 +23,7 @@ COPY requirements.txt .
 
 # install dependencies
 RUN pip install -r requirements.txt
-
+RUN pip install py-mini-racer
 # copy the content of the local src directory to the working directory
 COPY . .
 COPY ./lib/libmini_racer.dylib /usr/local/lib/python3.11/lib/python/site-packages/py_mini_racer/
