@@ -4,11 +4,13 @@ import pymysql
 
 from backtrader.feed import DataBase
 from backtrader import date2num
+from taosrest import RestClient
+import taosrest
 
 
 def new_data(section, start, end):
     table, contract_type, symbol, interval = section.split(":")
-    data = MySQLData(
+    data = KlineData(
         table,
         symbol=symbol,
         contract_type=contract_type,
@@ -19,13 +21,12 @@ def new_data(section, start, end):
     return data
 
 
-class MySQLData(DataBase):
+class KlineData(DataBase):
     params = (
         ('fromdate', datetime.min),
         ('todate', datetime.max),
-        ('symbol', ''),
-        ('contract_type', ''),
-        ('interval', '1m'),
+        ('table', ''),
+        ('freq', ''),
     )
     # 默认是这些列：datetime'、 'open'、'high'、'low'、'close'、'volume'、'openinterest'
     # 如果需要增加，在这里声明
@@ -35,7 +36,7 @@ class MySQLData(DataBase):
         "change_pct"
     )
 
-    def load_data_from_db(self, symbol, contract_type, interval, start_time, end_time):
+    def load_data_from_db(self, table, start_time, end_time):
         """
         从MySQL加载指定数据
         Args:
@@ -46,32 +47,28 @@ class MySQLData(DataBase):
         return:
             data (List): 数据集
         """
-        db = pymysql.connect(
-            host="localhost",
-            user="root",
-            password="",
-            db="feeds_dev",
-            port=4000
-        )
 
-        cur = db.cursor()
+        cur = self.conn.cursor()
+        try:
+            sql = cur.execute(
+                f"SELECT * FROM '{table}' WHERE vol>0 and ts >= ? "
+                "and ts < ?  order by ts asc",
+                (start_time.timestamp() * 1e3, end_time.timestamp() * 1e3,)
+            )
+            data = cur.fetchall()
+            return iter(list(data))
+        except BaseException as e:
+            print("exception occur")
+            print(e)
+            raise e
 
-        sql = cur.execute(
-            f"SELECT * FROM {self.table} WHERE vol>0 and timestamp_in_micro >= %s"
-            "and timestamp_in_micro < %s and symbol = %s and contract_type = %s and `interval` = %s order by timestamp_in_micro asc",
-            (start_time.timestamp() * 1e6, end_time.timestamp() * 1e6, symbol, contract_type, interval,)
-        )
-        data = cur.fetchall()
-        db.close()
-        return iter(list(data))
-
-    def __init__(self, table, **kwargs):
+    def __init__(self, **kwargs):
         self.result = []
-        self.table = table
+        self.conn = taosrest.connect(url="http://localhost:6041", user="root", password="taosdata", database="feeds")
 
     def start(self):
         self.result = self.load_data_from_db(
-            self.p.symbol, self.p.contract_type, self.p.interval, self.p.fromdate, self.p.todate
+            self.p.table, self.p.fromdate, self.p.todate
         )
 
     def _load(self):

@@ -9,7 +9,6 @@ import math
 import warnings
 
 from MyTT import *
-from mysql import MySQLData
 from printAnalyzer import printTradeAnalysis
 
 

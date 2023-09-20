@@ -2,7 +2,7 @@ from sanic import Sanic, json, SanicException, text
 from sanic.log import logger
 
 import strategy_底部连阳_回踩_突破
-from mysql import MySQLData
+from data import MySQLData
 from dateutil.parser import parse
 import akshare
 import Ashare

@@ -12,7 +12,7 @@ import warnings
 
 from MyTT import *
 from formula import *
-from mysql import MySQLData
+from data import MySQLData
 from printAnalyzer import printTradeAnalysis
 
 

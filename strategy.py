@@ -82,10 +82,10 @@ def run_formula(strategy, data):
         if data[0].p.interval.endswith('d') or data[0].p.interval.endswith('w'):
             tf = bt.TimeFrame.Days
         for d in data:
-            cerebro.adddata(d, name=d.p.symbol + ':' + d.p.contract_type)
+            cerebro.adddata(d, name=d.p.table)
     else:
-        cerebro.adddata(data, name=data.p.symbol + ':' + data.p.contract_type)
-        if data.p.interval.endswith('d') or data.p.interval.endswith('w'):
+        cerebro.adddata(data, name=data.p.table)
+        if data.p.freq.endswith('d') or data.p.freq.endswith('w'):
             tf = bt.TimeFrame.Days
 
     # 添加手续费，按照万分之二收取

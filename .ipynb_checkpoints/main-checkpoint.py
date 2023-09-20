@@ -8,7 +8,7 @@ import copy
 import math
 import warnings
 
-from mysql import MySQLData
+from data import MySQLData
 
 warnings.filterwarnings("ignore")
 import pyfolio as pf

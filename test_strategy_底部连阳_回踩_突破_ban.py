@@ -12,7 +12,7 @@ import warnings
 
 from MyTT import *
 from formula import *
-from mysql import MySQLData
+from data import MySQLData
 from printAnalyzer import printTradeAnalysis
 from strategy import run_formula, buys_time
 from strategy_底部连阳_回踩_突破 import Strategy

@@ -6,7 +6,7 @@ on:
       - '*'
 
 env:
-  DOCKERHUB_USERNAME: aiquant9
+  DOCKERHUB_USERNAME: jei888
 
 # fix error:installation not allowed to Create organization package
 permissions:
@@ -14,6 +14,7 @@ permissions:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    environment: main
     permissions:
       contents: read
       packages: write
@@ -31,8 +32,8 @@ jobs:
       - id: build-push-image
         uses: iquant9/deploy-action@main
         with:
-          registry_username: ${{github.actor}}
-          registry_password: ${{secrets.GITHUB_TOKEN}}
+          registry_username: ${{env.DOCKERHUB_USERNAME}}
+          registry_password: ${{env.DOCKERHUB_TOKEN}}
           tag: ghcr.io/${{github.repository}}:${{ steps.image_tag.outputs.new_image_tag }}
           file: ./Dockerfile
       - run: echo new image is ${{ steps.build-push-image.outputs.new-image }}

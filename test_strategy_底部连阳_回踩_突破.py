@@ -12,7 +12,7 @@ import warnings
 
 from MyTT import *
 from formula import *
-from mysql import MySQLData
+from data import KlineData
 from printAnalyzer import printTradeAnalysis
 from strategy import run_formula, buys_time
 from strategy_底部连阳_回踩_突破 import Strategy
@@ -21,7 +21,7 @@ from strategy_底部连阳_回踩_突破 import Strategy
 class TestStrategy(TestCase):
     def test(self):
         # 添加数据到cerebro
-        data = MySQLData(
+        data = KlineData(
             "kline_ashare",
             symbol="300081",
             contract_type="spot",
@@ -48,10 +48,8 @@ class TestStrategy(TestCase):
 
     # 华西股份
     def test_000936_1d_20230609(self):
-        data = MySQLData(
-            "kline_ashare",
-            symbol="000936",
-            contract_type="spot",
+        data = KlineData(
+            "as_000933_1m",
             fromdate=datetime.datetime(2023, 1, 1),
             todate=datetime.datetime(2023, 6, 20),
             interval="1d",
@@ -64,13 +62,11 @@ class TestStrategy(TestCase):
 
     def test_kline_em_index_减速器_1d(self):
         # hit 2023-06-12
-        data = MySQLData(
-            "kline_em",
-            symbol="减速器",
-            contract_type="index",
+        data = KlineData(
+            table="em_减速器_1d",
             fromdate=datetime.datetime(2023, 1, 1),
             todate=datetime.datetime(2023, 6, 20),
-            interval="1d",
+            freq="1d",
         )
         result = run_formula(Strategy, data)
         hit_list = list(result[0].orders.hit_dt.astype(str).values.tolist())
@@ -82,7 +78,7 @@ class TestStrategy(TestCase):
         self.assertEqual(len(dates), 2)
 
     def test_kline_em_index_CPO概念_1d(self):
-        data = MySQLData(
+        data = KlineData(
             "kline_em",
             symbol="CPO概念",
             contract_type="index",
@@ -100,7 +96,7 @@ class TestStrategy(TestCase):
         self.assertEqual(len(dates), 2)
 
     def test_kline_em_index_AIGC概念_1d(self):
-        data = MySQLData(
+        data = KlineData(
             "kline_em",
             symbol="AIGC概念",
             contract_type="index",
