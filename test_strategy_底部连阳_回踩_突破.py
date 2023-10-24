@@ -19,18 +19,19 @@ from strategy_底部连阳_回踩_突破 import Strategy
 
 
 class TestStrategy(TestCase):
-    def test(self):
+    def test_张江高科_1d_20230614_1000(self):
         # 添加数据到cerebro
-        data = KlineData(
+        data = MySQLData(
             "kline_ashare",
-            symbol="300081",
+            symbol="002896",
             contract_type="spot",
             fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 12),
-            interval="1h",
+            todate=datetime.datetime(2023, 6, 20),
+            interval="30m",
         )
-        result = self.run_formula(Strategy, data)
-        self.assertIn("2020-01-01 19:00:00", result, "hit")
+        result = run_formula(Strategy, data)
+        hit_list = list(result[0].orders.hit_dt.astype(str).values.tolist())
+        self.assertIn("2023-06-14 09:30:00", hit_list, "hit")
 
     def test_002896_30min_20230614_1000(self):
         # 添加数据到cerebro

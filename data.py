@@ -26,6 +26,8 @@ class KlineData(DataBase):
         ('fromdate', datetime.min),
         ('todate', datetime.max),
         ('table', ''),
+        ('exchange', ''),
+        ('symbol', ''),
         ('freq', ''),
     )
     # 默认是这些列：datetime'、 'open'、'high'、'low'、'close'、'volume'、'openinterest'
@@ -36,7 +38,7 @@ class KlineData(DataBase):
         "change_pct"
     )
 
-    def load_data_from_db(self, table, start_time, end_time):
+    def load_data_from_db(self, start_time, end_time):
         """
         从MySQL加载指定数据
         Args:
@@ -49,11 +51,14 @@ class KlineData(DataBase):
         """
 
         cur = self.conn.cursor()
+        start_ts = int(start_time.timestamp() * 1e3)
+        end_ts = int(end_time.timestamp() * 1e3)
+        # end_ts = 1696499200000000
+        table = "kline_%s_%s_%s" % (self.p.exchange, self.p.symbol, self.p.freq)
         try:
             sql = cur.execute(
-                f"SELECT * FROM '{table}' WHERE vol>0 and ts >= ? "
-                "and ts < ?  order by ts asc",
-                (start_time.timestamp() * 1e3, end_time.timestamp() * 1e3,)
+                f"SELECT * FROM {table} where "
+                f"v>0 and  ts >= {start_ts} and ts < {end_ts} order by ts asc"
             )
             data = cur.fetchall()
             return iter(list(data))
@@ -68,7 +73,7 @@ class KlineData(DataBase):
 
     def start(self):
         self.result = self.load_data_from_db(
-            self.p.table, self.p.fromdate, self.p.todate
+            self.p.fromdate, self.p.todate
         )
 
     def _load(self):
@@ -76,14 +81,14 @@ class KlineData(DataBase):
             one_row = next(self.result)
         except StopIteration:
             return False
-        dt = datetime.fromtimestamp(one_row[3] / 1e6)
+        dt = one_row[0]
         self.lines.datetime[0] = date2num(dt)
-        self.lines.open[0] = float(one_row[6])
-        self.lines.close[0] = float(one_row[7])
-        self.lines.high[0] = float(one_row[9])
-        self.lines.low[0] = float(one_row[8])
-        self.lines.volume[0] = float(one_row[10])
-        self.lines.turnover[0] = float(one_row[11])
+        self.lines.open[0] = float(one_row[1])
+        self.lines.close[0] = float(one_row[2])
+        self.lines.high[0] = float(one_row[3])
+        self.lines.low[0] = float(one_row[4])
+        self.lines.volume[0] = float(one_row[5])
+        self.lines.turnover[0] = float(one_row[6])
         self.lines.change_pct[0] = self.lines.close[0] / self.lines.close[-1] - 1
 
         return True

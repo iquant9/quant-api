@@ -31,6 +31,13 @@ class Ind:
 
 # warnings.filterwarnings("ignore")
 class Formula():
+    def __init__(self, data, ind):
+        self.data = data
+        self.ind = ind
+
+    def get_current_date(self):
+        return self.data.datetime.datetime(0)
+
     def f_底部连阳上穿均线(self, k):
         ma5, ma10 = np.array(self.ma5[k]), np.array(self.ma10[k])
         n = BARSLAST(np.array(k.close.array) < np.array(k.open.array))
@@ -92,6 +99,16 @@ class Formula():
         except:
             # ind path
             return np.array(line.get(0, size=line.line.idx + 1))
+
+    def C(self):
+        return self.get_array(self.data.close)
+
+    def DIF(self):
+        return self.get_array(self.ind.dif)
+    def DEA(self):
+        return self.get_array(self.ind.dea)
+    def MACD(self):
+        return self.get_array(self.ind.macd)
 
     def get_past_array(self, line):
         return np.array(line.get(ago=-1, size=line.idx))

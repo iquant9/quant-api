@@ -13,6 +13,7 @@ class BaseStrategy(bt.Strategy):
             self.ind[d].ma5 = bt.ind.SMA(d, period=5)
             self.ind[d].ma10 = bt.ind.SMA(d, period=10)
             self.ind[d].ma20 = bt.ind.SMA(d, period=20)
+            self.ind[d].ma60 = bt.ind.SMA(d, period=60)
             m = bt.indicators.MACD(self.data,
                                    period_me1=12,
                                    period_me2=26,

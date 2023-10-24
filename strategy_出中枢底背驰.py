@@ -19,17 +19,32 @@ class Strategy(BaseStrategy):
         self.stock_dict = {}
 
     def next(self):
-        current_date = self.datas[0].datetime.datetime(0)
+        try:
+            self.f()
+        except:
+            return
+
+    def f(self):
+        f0 = Formula(self.datas[0])
+        current_date = f0.get_current_date()
         long_list = []
         short_list = []
-        if current_date.day == 14:
-            pass
-        if current_date.day == 12:
+        if current_date.day == 22:
             pass
         k = self.data
         ind = self.ind[self.data]
-        if ind.dif < 0:
+        # if ind.dif < 0:
+        #     return False
+        if ind.ma60 is not None and k.close < ind.ma60:
+            pass
+        else:
             return False
+
+        # 找出最近40天的最高价
+        n = 40
+        if len(self.data) < n:
+            n = len(self.data)
+        high_t = HHVBARS(f0.C(), n)[-1]
         hit, start, end = self.formula.LAST_底部连阳上穿均线(self.data, self.ind[self.data])
         if not hit:
             return
@@ -65,5 +80,3 @@ class Strategy(BaseStrategy):
         # 只在第一次新高产生买点，避免连续的新高连续命中
         if REF(high1, 1)[-1] < 2:
             return False
-
-        self.order = self.buy(data=self.data)
