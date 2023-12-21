@@ -1,0 +1,5 @@
+[sqlalchemy.dialects]
+taos=taos.sqlalchemy:TaosDialect
+taosrest=taosrest.sqlalchemy:TaosRestDialect
+taosws=taos.sqlalchemy:TaosWsDialect
+
