@@ -23,8 +23,8 @@ class TestFormula(TestCase):
             "kline_ashare",
             symbol="002995",
             contract_type="spot",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 12),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 12),
             interval="30m",
         )
         result=self.run_formula("反弹至均线后下跌不创新低", data)
@@ -35,8 +35,8 @@ class TestFormula(TestCase):
             "kline_ashare",
             symbol="300081",
             contract_type="spot",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 12),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 12),
             interval="1h",
         )
         result=self.run_formula("反弹至均线后下跌不创新低", data)

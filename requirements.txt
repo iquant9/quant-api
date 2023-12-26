@@ -7,4 +7,3 @@ PyMySQL==1.0.3
 python_dateutil==2.8.2
 Requests==2.31.0
 sanic==23.3.0
-taospy==2.7.12

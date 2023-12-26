@@ -15,23 +15,37 @@ from formula import *
 from data import KlineData
 from printAnalyzer import printTradeAnalysis
 from strategy import run_formula, buys_time
-from strategy_ma60底背驰 import Strategy
+from strategy_下跌提前企稳 import Strategy
 
 
 class TestStrategy(TestCase):
 
-    def test_张江高科_1h_0922_0930(self):
+    def test_603496_1d_230920(self):
+        start = datetime.datetime(2023, 6, 29)
+        end = datetime.datetime(2023, 9, 29)
         # 添加数据到cerebro
-        data = KlineData(
-            exchange="as",
-            symbol="600895",
-            freq="1h",
-            start_date=datetime.datetime(2023, 9, 1),
-            end_date=datetime.datetime(2023, 11, 12),
+        data0 = KlineData(
+            table="kline",
+            exchange="asindex",
+            symbol="sz399300",
+            freq="1d",
+            start_date=start,
+            end_date=end,
         )
-        result = run_formula(Strategy, data)
+        datas = [data0, ]
+        for symbol in ['603496', '002682','300042']:
+            data1 = KlineData(
+                table="kline",
+                exchange="as",
+                symbol=symbol,
+                freq="1d",
+                start_date=start,
+                end_date=end,
+            )
+            datas.append(data1)
+        result = run_formula(Strategy, datas)
         hit_list = list(result[0].orders.hit_dt.astype(str).values.tolist())
-        self.assertIn("2023-09-22 09:30:00", hit_list, "hit")
+        self.assertIn("2023-09-20 09:30:00", hit_list, "hit")
 
     def test_硕贝德_2h_0928_1030(self):
         # 添加数据到cerebro

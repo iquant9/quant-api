@@ -12,6 +12,12 @@ from MyTT import *
 from printAnalyzer import printTradeAnalysis
 
 
+class Result:
+    def __init__(self):
+        self.hit = False
+        self.data = {}
+
+
 class Ind:
     def __init__(self):
         self.ma5 = None
@@ -31,12 +37,15 @@ class Ind:
 
 # warnings.filterwarnings("ignore")
 class Formula():
-    def __init__(self, data, ind):
-        self.data = data
-        self.ind = ind
+    def __init__(self,):
+        self.data = None
+        self.ind = None
+    # def __init__(self, data, ind):
+    #     self.data = data
+    #     self.ind = ind
 
-    def get_current_date(self):
-        return self.data.datetime.datetime(0)
+    def get_date(self, ref=0):
+        return self.data.datetime.datetime(-ref)
 
     def f_底部连阳上穿均线(self, k):
         ma5, ma10 = np.array(self.ma5[k]), np.array(self.ma10[k])
@@ -89,8 +98,46 @@ class Formula():
             return False, 0, 0
         return True, start, end
 
-    def get_idx(self, k):
-        return k.close.idx
+    def T(self, arr, ref=0):
+        start = arr[len(arr) - 1 - ref]
+        start = start + ref
+        if start > self.get_idx():
+            return None
+        return start
+
+    def V(self, arr, ref=0):
+        start = arr[len(arr) - 1 - ref]
+        return start
+
+    def BARSLAST(self, ss, ref=0):
+        v = self.T(BARSLAST(ss), ref=ref)
+        return v
+
+    def HHV(self, ss, from_ref, to_ref):
+        v = self.Value(HHV(ss, from_ref - to_ref), ref=to_ref)
+        return v
+
+    def LLV(self, ss, from_ref, to_ref):
+        v = self.V(LLV(ss, from_ref - to_ref), ref=to_ref)
+        return v
+
+    def SUM(self, ss, from_ref, to_ref):
+        v = self.V(SUM(ss, from_ref - to_ref), ref=to_ref)
+        return v
+
+    def COUNT(self, ss, from_ref, to_ref):
+        v = COUNT(ss, from_ref - to_ref, )
+        v = self.V(v, ref=to_ref)
+        return v
+
+    def BARSSINCEN(self, ss, n):
+        v = BARSSINCEN(ss, n)
+        if v[-1] == 0:
+            return None
+        return v[-1]
+
+    def get_idx(self):
+        return self.data.close.idx
 
     def get_array(self, line):
         try:
@@ -105,10 +152,15 @@ class Formula():
 
     def DIF(self):
         return self.get_array(self.ind.dif)
+
     def DEA(self):
         return self.get_array(self.ind.dea)
+
     def MACD(self):
         return self.get_array(self.ind.macd)
+
+    def REF(self, ss, ref):
+        return self.V(ss, ref=ref)
 
     def get_past_array(self, line):
         return np.array(line.get(ago=-1, size=line.idx))

@@ -129,8 +129,8 @@ data_root = "/home/yun/data/stock/day/"
 
 params = dict(
 
-    fromdate=datetime.datetime(2005, 1, 4),
-    todate=datetime.datetime(2020, 7, 31),
+    start_date=datetime.datetime(2005, 1, 4),
+    end_date=datetime.datetime(2020, 7, 31),
     timeframe=bt.TimeFrame.Days,
     dtformat=("%Y-%m-%d"),
     compression=1,
@@ -150,8 +150,8 @@ base = MySQLData(
     table,
     symbol="sh000001",
     contract_type="index",
-    fromdate=datetime.datetime(2023, 1, 1),
-    todate=datetime.datetime(2023, 6, 12),
+    start_date=datetime.datetime(2023, 1, 1),
+    end_date=datetime.datetime(2023, 6, 12),
     interval="1d",
 )
 cerebro.adddata(base, name="base")
@@ -164,8 +164,8 @@ for symbol in symbols:
         table,
         symbol=symbol,
         contract_type="spot",
-        fromdate=datetime.datetime(2023, 1, 1),
-        todate=datetime.datetime(2023, 6, 12),
+        start_date=datetime.datetime(2023, 1, 1),
+        end_date=datetime.datetime(2023, 6, 12),
         interval="1d",
     )
     # 添加数据到cerebro

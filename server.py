@@ -35,8 +35,8 @@ async def handler(request):
             table,
             symbol=symbol,
             contract_type=contract_type,
-            fromdate=start,
-            todate=end,
+            start_date=start,
+            end_date=end,
             interval=interval,
         )
         try:

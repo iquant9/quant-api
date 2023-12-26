@@ -14,8 +14,8 @@ def new_data(section, start, end):
         table,
         symbol=symbol,
         contract_type=contract_type,
-        fromdate=start,
-        todate=end,
+        start_date=start,
+        end_date=end,
         interval=interval,
     )
     return data
@@ -23,8 +23,8 @@ def new_data(section, start, end):
 
 class KlineData(DataBase):
     params = (
-        ('fromdate', datetime.min),
-        ('todate', datetime.max),
+        ('start_date', datetime.min),
+        ('end_date', datetime.max),
         ('table', ''),
         ('exchange', ''),
         ('symbol', ''),
@@ -73,7 +73,7 @@ class KlineData(DataBase):
 
     def start(self):
         self.result = self.load_data_from_db(
-            self.p.fromdate, self.p.todate
+            self.p.start_date, self.p.end_date
         )
 
     def _load(self):

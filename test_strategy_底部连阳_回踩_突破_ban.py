@@ -24,8 +24,8 @@ class TestStrategy(TestCase):
             "kline_em",
             symbol="LED",
             contract_type="index",
-            fromdate=datetime.datetime(2023, 3, 1),
-            todate=datetime.datetime(2023, 6, 20),
+            start_date=datetime.datetime(2023, 3, 1),
+            end_date=datetime.datetime(2023, 6, 20),
             interval="1d",
         )
         result = run_formula(Strategy, data)
@@ -37,8 +37,8 @@ class TestStrategy(TestCase):
             "kline_em",
             symbol="eSIM",
             contract_type="index",
-            fromdate=datetime.datetime(2023, 3, 1),
-            todate=datetime.datetime(2023, 7, 20),
+            start_date=datetime.datetime(2023, 3, 1),
+            end_date=datetime.datetime(2023, 7, 20),
             interval="1d",
         )
         result = run_formula(Strategy, data)
@@ -50,8 +50,8 @@ class TestStrategy(TestCase):
             "kline_em",
             symbol="Chiplet概念",
             contract_type="index",
-            fromdate=datetime.datetime(2023, 3, 1),
-            todate=datetime.datetime(2023, 7, 20),
+            start_date=datetime.datetime(2023, 3, 1),
+            end_date=datetime.datetime(2023, 7, 20),
             interval="1d",
         )
         result = run_formula(Strategy, data)

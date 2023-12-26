@@ -25,8 +25,8 @@ class TestStrategy(TestCase):
             "kline_ashare",
             symbol="002896",
             contract_type="spot",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 20),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 20),
             interval="30m",
         )
         result = run_formula(Strategy, data)
@@ -39,8 +39,8 @@ class TestStrategy(TestCase):
             "kline_ashare",
             symbol="002896",
             contract_type="spot",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 20),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 20),
             interval="30m",
         )
         result = run_formula(Strategy, data)
@@ -51,8 +51,8 @@ class TestStrategy(TestCase):
     def test_000936_1d_20230609(self):
         data = KlineData(
             "as_000933_1m",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 20),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 20),
             interval="1d",
         )
         result = run_formula(Strategy, data)
@@ -65,8 +65,8 @@ class TestStrategy(TestCase):
         # hit 2023-06-12
         data = KlineData(
             table="em_减速器_1d",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 20),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 20),
             freq="1d",
         )
         result = run_formula(Strategy, data)
@@ -83,8 +83,8 @@ class TestStrategy(TestCase):
             "kline_em",
             symbol="CPO概念",
             contract_type="index",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 20),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 20),
             interval="1d",
         )
         result = run_formula(Strategy, data)
@@ -101,8 +101,8 @@ class TestStrategy(TestCase):
             "kline_em",
             symbol="AIGC概念",
             contract_type="index",
-            fromdate=datetime.datetime(2022, 10, 1),
-            todate=datetime.datetime(2023, 1, 20),
+            start_date=datetime.datetime(2022, 10, 1),
+            end_date=datetime.datetime(2023, 1, 20),
             interval="1d",
         )
         result = run_formula(Strategy, data)

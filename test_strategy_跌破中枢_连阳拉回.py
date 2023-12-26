@@ -10,8 +10,8 @@ class TestStrategy(TestCase):
             "kline_ashare",
             symbol="002896",
             contract_type="spot",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 12),
+            start_date=datetime.datetime(2023, 1, 1),
+            end_date=datetime.datetime(2023, 6, 12),
             interval="1h",
         )
         result = run_formula(Strategy, data)

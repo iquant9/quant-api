@@ -1,18 +1,28 @@
 from unittest import TestCase
+
+from data import KlineData
 from strategy import *
-from strategy_跌破中枢_连阳拉回 import Strategy
+from strategy_弱转强 import Strategy
 
 
 class TestStrategy(TestCase):
-    def test_002896_1h_202300613_0930(self):
+    def test_603598_20231130(self):
+        # 引力传媒
         # 添加数据到cerebro
-        data = MySQLData(
-            "kline_ashare",
-            symbol="002896",
-            contract_type="spot",
-            fromdate=datetime.datetime(2023, 1, 1),
-            todate=datetime.datetime(2023, 6, 12),
-            interval="1h",
+        data_a = KlineData(
+            exchange="as",
+            symbol="603598",
+            freq="1h",
+            start_date=datetime.datetime(2023, 8, 1),
+            end_date=datetime.datetime(2023, 12, 12),
         )
-        result = run_formula(Strategy, data)
-        self.assertIn("2020-01-01 19:00:00", result, "hit")
+        data_b= KlineData(
+            exchange="emconcept",
+            symbol="bk1151",
+            freq="1h",
+            start_date=datetime.datetime(2023, 8, 1),
+            end_date=datetime.datetime(2023, 12, 12),
+        )
+        result = run_formula(Strategy, [data_a,data_b])
+        hit_list = list(result[0].orders.hit_dt.astype(str).values.tolist())
+        self.assertIn("2023-09-22 09:30:00", hit_list, "hit")

@@ -13,14 +13,17 @@ class BaseStrategy(bt.Strategy):
             self.ind[d].ma5 = bt.ind.SMA(d, period=5)
             self.ind[d].ma10 = bt.ind.SMA(d, period=10)
             self.ind[d].ma20 = bt.ind.SMA(d, period=20)
-            self.ind[d].ma60 = bt.ind.SMA(d, period=60)
-            m = bt.indicators.MACD(self.data,
-                                   period_me1=12,
-                                   period_me2=26,
-                                   period_signal=9)
-            self.ind[d].dif = m.macd
-            self.ind[d].dea = m.signal
-            self.ind[d].macd = m.macd - m.signal
+            # 如果调用backtrader的SMA，但是k线条数不够会导致crash
+            if len(d.array) > 60:
+                self.ind[d].ma60 = bt.ind.SMA(d, period=60)
+            if len(d.array) > 26:
+                m = bt.indicators.MACD(self.data,
+                                       period_me1=12,
+                                       period_me2=26,
+                                       period_signal=9)
+                self.ind[d].dif = m.macd
+                self.ind[d].dea = m.signal
+                self.ind[d].macd = (m.macd - m.signal) * 2
             self.ind[d].vol5 = bt.ind.SMA(d.volume, period=5)
             self.ind[d].vol10 = bt.ind.SMA(d.volume, period=10)
 
@@ -30,6 +33,7 @@ class BaseStrategy(bt.Strategy):
         print('{}, {}'.format(dt.isoformat(), txt))
 
     def notify_order(self, order):
+        symbol = order.p.data.p.symbol
         if order.isbuy():
             if order.executed.dt:
                 executed_dt = bt.num2date(order.executed.dt)
@@ -38,7 +42,6 @@ class BaseStrategy(bt.Strategy):
             hit_dt = self.data.datetime.datetime(-1)
             self.buyprice = order.executed.price
             self.buycomm = order.executed.comm
-            symbol = self.getdatanames()[0]
             self.orders.loc[len(self.orders)] = [hit_dt, executed_dt, order.ordtype, symbol, order.executed.price,
                                                  order.executed.value]  # adding a row
 
@@ -51,8 +54,8 @@ class BaseStrategy(bt.Strategy):
         if order.status in [order.Completed]:
             if order.isbuy():
                 self.log(
-                    'BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
-                    (order.executed.price,
+                    '%s BUY EXECUTED, Price: %.2f, Cost: %.2f, Comm %.2f' %
+                    (symbol, order.executed.price,
                      order.executed.value,
                      order.executed.comm))
             else:  # Sell
@@ -80,10 +83,10 @@ def run_formula(strategy, data):
 
     # 添加数据到cerebro
     if isinstance(data, list):
-        if data[0].p.interval.endswith('d') or data[0].p.interval.endswith('w'):
+        if data[0].p.freq.endswith('d') or data[0].p.freq.endswith('w'):
             tf = bt.TimeFrame.Days
         for d in data:
-            cerebro.adddata(d, name=d.p.table)
+            cerebro.adddata(d, name=d.p.symbol)
     else:
         cerebro.adddata(data, name=data.p.table)
         if data.p.freq.endswith('d') or data.p.freq.endswith('w'):
