@@ -1,14 +1,19 @@
 from sanic import Sanic, json, SanicException, text
 from sanic.log import logger
 
-import strategy_底部连阳_回踩_突破
-from data import MySQLData
+from strategy import *
+
 from dateutil.parser import parse
 import akshare
 import Ashare
+from data import KlineData
+from strategy import strategy_弱转强
+from strategy.base import run_formula
 
-strategyMap = {
-    "底部连阳_回踩_突破": strategy_底部连阳_回踩_突破.Strategy,
+# from strategy.strategy_弱转强 import Strategy
+
+strategyArr = {
+    "底部连阳_回踩_突破": strategy_弱转强.Strategy,
 }
 
 app = Sanic(name='quant-api')
@@ -23,31 +28,32 @@ async def hello_world(request):
 
 @app.post("run_strategy")
 async def handler(request):
-    from strategy import run_formula
     d = request.json
-    f = strategyMap[d['strategy']]
+    # strategy_底部连阳_回踩_突破.Strategy
+    f = eval("strategy_" + d['strategy'] + ".Strategy")
     df = None
     start = parse(d['start'])
     end = parse(d['end'])
+    datas = []
     for section in d["symbol_group"]:
-        table, contract_type, symbol, interval = section.split(":")
-        data = MySQLData(
-            table,
+        exchange, symbol, interval = section.split(".")
+        data = KlineData(
+            exchange=exchange,
             symbol=symbol,
-            contract_type=contract_type,
             start_date=start,
             end_date=end,
-            interval=interval,
+            freq=interval,
         )
-        try:
-            result = run_formula(f, data)
-        except Exception as e:
-            logger.error('run_formula error:%s %s', e, d)
-            continue
-        if df is None:
-            df = result[0].orders
-        else:
-            df = df.append(result[0].orders)
+        datas.append(data)
+    try:
+        result = run_formula(f, datas)
+    except Exception as e:
+        logger.error('run_formula error:%s %s', e, d)
+        raise e
+    if df is None:
+        df = result[0].orders
+    else:
+        df = df.append(result[0].orders)
     if df is None:
         return json([])
     df['hit_dt'] = df['hit_dt'].astype(str)
