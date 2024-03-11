@@ -1,18 +1,9 @@
 import logging
 
-import backtrader as bt
 import datetime
-import pandas as pd
-import numpy as np
-import os, sys
-import copy
 
-import math
-import warnings
-
-from MyTT import *
+from strategy.MyTT import *
 from formula import Formula, Result
-from printAnalyzer import printTradeAnalysis
 
 
 # 沪深300 1d 20220426

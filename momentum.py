@@ -1,14 +1,7 @@
 import backtrader as bt
 import datetime
-import pandas as pd
-import numpy as np
-import os, sys
-import copy
 
-import math
-import warnings
-
-from MyTT import *
+from strategy.MyTT import *
 from data import MySQLData
 from printAnalyzer import printTradeAnalysis
 

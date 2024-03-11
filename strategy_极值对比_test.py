@@ -1,20 +1,9 @@
 from unittest import TestCase
-import backtrader as bt
 
 import datetime
-import pandas as pd
-import numpy as np
-import os, sys
-import copy
 
-import math
-import warnings
-
-from MyTT import *
-from formula import *
-from data import MySQLData, new_data
-from printAnalyzer import printTradeAnalysis
-from strategy import run_formula, buys_time
+from data import new_data
+from strategy import run_formula
 from strategy_极值对比 import Strategy
 
 

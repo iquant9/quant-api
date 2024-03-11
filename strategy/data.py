@@ -37,7 +37,7 @@ class ArrowData(bt.feeds.PandasData):
         # 可以根据需要添加其他参数
     )
 
-    def __init__(self, exchange, symbol, freq, start_date, end_date):
+    def __init__(self, exchange, symbol, freq, start_date, end_date,tz=pytz.timezone('Asia/Shanghai')):
         req = {
             "name": f"kline_{exchange}_{symbol}_{freq}",
             "timestampStart": start_date.timestamp() * 1000,
@@ -52,7 +52,7 @@ class ArrowData(bt.feeds.PandasData):
         # 确保时间列是datetime类型
         self.p.dataname = df
         self.p.freq = freq
-        self.p.symbol = symbol
+        self.p.name = symbol
         self.p.timeframe = bt.TimeFrame.Days
         # 调用父类的__init__方法，传递处理后的DataFrame
         super(ArrowData, self).__init__()

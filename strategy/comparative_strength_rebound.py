@@ -1,17 +1,18 @@
 import backtrader as bt
 
-from custom_mytt import HHV
 from formula import Formula
 from strategy.base import BaseStrategy, is_valid_number
 import numpy as np
 
+from strategy.custom_mytt import *
+
 
 # ComparativeStrengthReboundStrategy 比较强度反弹策略
 #
-class ComparativeStrengthReboundStrategy(BaseStrategy):
+class Strategy(BaseStrategy):
     params = (
         ('lookback_period', 10),  # Lookback period for comparison
-        ('threshold', 8),  # Threshold for 90% confidence
+        ('threshold', 6),  # Threshold for 90% confidence
     )
 
     def __init__(self):
@@ -25,21 +26,38 @@ class ComparativeStrengthReboundStrategy(BaseStrategy):
 
     def next(self):
         current_date = self.datas[0].datetime.datetime(0)
-        if current_date.day == 22:
+        if current_date.day == 22 and current_date.hour == 13 and current_date.minute == 30:
             pass
-        if self.ref_data.close > self.ind[self.ref_data].ma20:
-            return
+
             # Calculate the comparison result for each data
         # Loop through the other datas
         for data in self.other_datas:
-            self.next_one(data)
+            try:
+                self.next_buy(data)
+                self.next_sell(data)
+            except:
+                continue
 
-    def next_one(self, data):
+    def next_buy(self, data):
         current_date = self.datas[0].datetime.datetime(0)
         data_today = data.close[0]
         if data_today < data.ma5[0]:
             return
-        # f1 = self.formula(data)
+        if data.close < self.ind[data].ma5:
+            return
+        # 当前close在最近10天价位的中上位置
+        high = self.V(HHV(data.close, 10))
+        low = self.V(LLV(data.close, 10))
+        rate = (data.close[0] - low) / (high - low)
+        if rate < 0.5:
+            return
+        high = self.V(HHV(self.ref_data.close, 10))
+        low = self.V(LLV(self.ref_data.close, 10))
+        ref_rate = (self.ref_data.close[0] - low) / (high - low)
+        if rate < ref_rate:
+            return
+
+            # f1 = self.formula(data)
         pct_change_max = self.V(HHV(data.pct_change, 20))
         if not is_valid_number(pct_change_max):
             return
@@ -67,3 +85,9 @@ class ComparativeStrengthReboundStrategy(BaseStrategy):
         if ref_today < ref_yesterday and data_today > data_yesterday:
             self.log(f'BUY {data._name}, Ref Down and {data._name} Up')
             self.order = self.buy(data)
+
+    def next_sell(self, data):
+        if self.getposition(data=data).size == 0:
+            return
+        if data.close[0] < self.ind[data].ma5[0]:
+            self.sell(data)

@@ -1,6 +1,138 @@
+import datetime
+
 import pytz
 
 from formula import *
+from strategy.data import ArrowData
+
+pd.set_option('display.max_rows', None)  # 显示所有行
+pd.set_option('display.max_columns', None)  # 显示所有列
+pd.set_option('display.width', None)  # 显示所有列宽
+
+
+def get_data(exchange, bk, freq,
+             start_date=datetime.datetime(2024, 1, 1),
+             end_date=datetime.datetime(2024, 12, 12),
+             tz=pytz.timezone('Asia/Shanghai')):
+    return ArrowData(
+        exchange=exchange,
+        symbol=bk,
+        freq=freq,
+        start_date=start_date,
+        end_date=end_date,
+        tz=tz
+    )
+
+
+def init_cerebro():
+    cerebro = bt.Cerebro()
+    # 添加手续费，按照万分之二收取
+    cerebro.broker.setcommission(commission=0.0002, stocklike=True)
+    # 设置初始资金为100万
+    cerebro.broker.setcash(1_0000_0000)
+    # 添加自定义的分析指标
+    cerebro.addanalyzer(bt.analyzers.PyFolio, timeframe=bt.TimeFrame.Minutes, compression=None)
+    cerebro.addanalyzer(TradeList, _name='tradelist')
+
+    return cerebro
+
+
+class TradeList(bt.Analyzer):
+    def __init__(self):
+
+        self.trades = []
+        self.cumprofit = 0.0
+
+    def notify_trade(self, trade):
+        if not trade.isclosed:
+            return
+        if len(trade.history) <= 0:
+            return
+        brokervalue = self.strategy.broker.getvalue()
+
+        dir = 'short'
+        if trade.history[0].event.size > 0: dir = 'long'
+
+        pricein = trade.history[len(trade.history) - 1].status.price
+        priceout = trade.history[len(trade.history) - 1].event.price
+        datein = bt.num2date(trade.history[0].status.dt, tz=trade.data.p.tz, naive=False)
+        dateout = bt.num2date(trade.history[len(trade.history) - 1].status.dt, tz=trade.data.p.tz, naive=False)
+        # if trade.data._timeframe >= bt.TimeFrame.Days:
+        #     datein = datein.date()
+        #     dateout = dateout.date()
+
+        pcntchange = 100 * priceout / pricein - 100
+        pnl = trade.history[len(trade.history) - 1].status.pnlcomm
+        pnlpcnt = 100 * pnl / brokervalue
+        barlen = trade.history[len(trade.history) - 1].status.barlen
+        pbar = pnl / barlen
+        self.cumprofit += pnl
+
+        size = value = 0.0
+        for record in trade.history:
+            if abs(size) < abs(record.status.size):
+                size = record.status.size
+                value = record.status.value
+
+        highest_in_trade = max(trade.data.high.get(ago=0, size=barlen + 1))
+        lowest_in_trade = min(trade.data.low.get(ago=0, size=barlen + 1))
+        hp = 100 * (highest_in_trade - pricein) / pricein
+        lp = 100 * (lowest_in_trade - pricein) / pricein
+        if dir == 'long':
+            mfe = hp
+            mae = lp
+        if dir == 'short':
+            mfe = -lp
+            mae = -hp
+
+        self.trades.append({'ref': trade.ref,
+                            'ticker': trade.data._name,
+                            'dir': dir,
+                            'datein': datein,
+                            'pricein': pricein,
+                            'dateout': dateout,
+                            'priceout': priceout,
+                            'chng%': round(pcntchange, 2),
+                            'pnl': pnl, 'pnl%': round(pnlpcnt, 2),
+                            'size': size,
+                            'value': value,
+                            'cumpnl': self.cumprofit,
+                            'nbars': barlen, 'pnl/bar': round(pbar, 2),
+                            'mfe%': round(mfe, 2), 'mae%': round(mae, 2)})
+
+    def get_analysis(self):
+        return self.trades
+
+
+def print_result(cerebro):
+    # 获取交易记录
+    transactions = cerebro.broker.get_transactions()
+    # 初始化总收益率
+    total_return = 0.0
+    # 打印所有交易记录及每笔交易的收益率
+    for i, transaction in enumerate(transactions):
+        # 买入或卖出的价格
+        price = transaction.price
+        # 买入或卖出的数量
+        size = transaction.size
+        # 交易成本（如果有）
+        commission = transaction.comm
+        # 交易类型（'buy' 或 'sell'）
+        order = 'buy' if size > 0 else 'sell'
+        # 计算单笔交易的价值
+        value = price * size
+        # 打印交易信息
+        print(f'Transaction {i}: {order} {abs(size)} units at {price}')
+        # 计算并打印单笔交易的收益率（此处简化处理，未考虑交易成本和时间价值）
+        if order == 'buy':
+            print(f'    Buy Value: {value}')
+        else:
+            # 卖出时计算收益率
+            profit = (price - transactions[i - 1].price) * size - 2 * commission  # 假设买入和卖出都有佣金
+            print(f'    Sell Profit/Loss: {profit}')
+            total_return += profit
+    # 打印总收益率
+    print(f'Total Return: {total_return}')
 
 
 # 我们使用的时候，直接用我们新的类读取数据就可以了。
@@ -32,16 +164,11 @@ class BaseStrategy(bt.Strategy):
 
     def log(self, txt, dt=None):
         ''' Logging function fot this strategy'''
-        dt = dt or self.datas[0].datetime.datetime(0)
-        dt = pytz.utc.localize(dt)
-        # 定义东八区时区
-        shanghai_timezone = pytz.timezone('Asia/Shanghai')
-        # 将UTC datetime转换为东八区datetime
-        shanghai_datetime = dt.astimezone(shanghai_timezone)
-        print('{}, {}'.format(shanghai_datetime, txt))
+        dt = dt or self.datas[0].datetime.datetime(0, naive=False)
+        print('%s, %s' % (dt.isoformat(), txt))
 
     def notify_order(self, order):
-        symbol = order.p.data.p.symbol
+        symbol = order.p.data.p.name
         if order.isbuy():
             if order.executed.dt:
                 executed_dt = bt.num2date(order.executed.dt)
@@ -79,11 +206,6 @@ class BaseStrategy(bt.Strategy):
 
         self.order = None
 
-    def notify_trade(self, trade):
-        if not trade.isclosed:
-            return
-        self.log(f'策略收益：\n毛收益 {trade.pnl:.2f}, 净收益 {trade.pnlcomm:.2f}')
-
     def formula(self, data):
         return Formula(data, self.ind[data])
 
@@ -97,33 +219,11 @@ class BaseStrategy(bt.Strategy):
         return self.data.close.idx
 
 
-def get_cerebro(data):
-    cerebro = bt.Cerebro()
-    tf = bt.TimeFrame.Minutes
-
-    # 添加数据到cerebro
-    if isinstance(data, list):
-        if data[0].p.freq.endswith('d') or data[0].p.freq.endswith('w'):
-            tf = bt.TimeFrame.Days
-        for d in data:
-            cerebro.adddata(d, name=d.p.symbol)
-    else:
-        cerebro.adddata(data, name=data.p.table)
-        if data.p.freq.endswith('d') or data.p.freq.endswith('w'):
-            tf = bt.TimeFrame.Days
-
-    # 添加手续费，按照万分之二收取
-    cerebro.broker.setcommission(commission=0.0002, stocklike=True)
-    # 设置初始资金为100万
-    cerebro.broker.setcash(1_0000_0000)
-
-    cerebro.addanalyzer(bt.analyzers.PyFolio, timeframe=tf, compression=None)
-    return cerebro
-
-
 def buys_time(result):
     for i in result._trades:
         print(i)
+
+
 def is_valid_number(value):
     # 检查变量是否是数字类型
     if isinstance(value, (int, float, complex)):

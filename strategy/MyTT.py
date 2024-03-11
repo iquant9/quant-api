@@ -18,9 +18,6 @@
 
 import numpy as np; import pandas as pd
 
-from decrator import to_array
-
-
 #------------------ 0级：核心工具函数 --------------------------------------------
 def RD(N,D=3):   return np.round(N,D)        #四舍五入取3位小数 
 def RET(S,N=1):  return np.array(S)[-N]      #返回序列倒数第N个值,默认返回最后一个

@@ -1,20 +1,12 @@
 from sanic import Sanic, json, SanicException, text
 from sanic.log import logger
 
-from strategy import *
-
 from dateutil.parser import parse
 import akshare
 import Ashare
-from data import KlineData
-from strategy import strategy_弱转强
-from strategy.base import run_formula
-
-# from strategy.strategy_弱转强 import Strategy
-
-strategyArr = {
-    "底部连阳_回踩_突破": strategy_弱转强.Strategy,
-}
+from strategy.base import init_cerebro
+from strategy.comparative_strength_rebound import Strategy
+from strategy.data import ArrowData
 
 app = Sanic(name='quant-api')
 
@@ -30,26 +22,24 @@ async def hello_world(request):
 async def handler(request):
     d = request.json
     # strategy_底部连阳_回踩_突破.Strategy
-    f = eval("strategy_" + d['strategy'] + ".Strategy")
+    # f = eval( d['strategy'] + ".Strategy")
     df = None
+    s1 = Strategy
+    cerebro = init_cerebro()
+    cerebro.addstrategy(s1)
     start = parse(d['start'])
     end = parse(d['end'])
-    datas = []
     for section in d["symbol_group"]:
         exchange, symbol, interval = section.split(".")
-        data = KlineData(
+        data = ArrowData(
             exchange=exchange,
             symbol=symbol,
             start_date=start,
             end_date=end,
             freq=interval,
         )
-        datas.append(data)
-    try:
-        result = run_formula(f, datas)
-    except Exception as e:
-        logger.error('run_formula error:%s %s', e, d)
-        raise e
+        cerebro.adddata(data)
+    result = cerebro.run()
     if df is None:
         df = result[0].orders
     else:

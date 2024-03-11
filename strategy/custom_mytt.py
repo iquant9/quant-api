@@ -1,5 +1,6 @@
-import MyTT
 import numpy as np
+
+from strategy import MyTT
 
 
 def to_array(func):
@@ -29,3 +30,6 @@ def to_array(func):
 @to_array
 def HHV(S, N):  # HHV(C, 5) 最近5天收盘最高价
     return MyTT.HHV(S, N)
+@to_array
+def LLV(S, N):  # HHV(C, 5) 最近5天收盘最高价
+    return MyTT.LLV(S, N)
